@@ -138,19 +138,26 @@ def FLD_averageMatrix(samples):
         averagesQuercus /= Qc
         Quercusaverage.append(averagesQuercus)
 
-FLD_averageMatrix(loadData("data.txt"))
+# FLD_averageMatrix(loadData("data.txt"))
 #-----------------------------------combinations-----------------------------------
 def FLD_listOfcombination(n):
+    FLD=float(0)
+    index_list=[]
     list_elements=list(range(64))
     combinations= itertools.combinations(range(64), n)
     for combination in combinations:
         matrixAC=[]
         matrixQR=[]
+        AC_avr_vector=[]
+        QR_avr_vector=[]
+        Fishers=[]
         for element in combination:
             value_average_AC = numpy.subtract(ACER[element], ((Aceraverage[element]) * len(ACER[element])))
             value_average_QR = numpy.subtract(QUERTUS[element], ((Quercusaverage[element]) * len(QUERTUS[element])))
             matrixAC.append(value_average_AC)
             matrixQR.append(value_average_QR)
+            AC_avr_vector.append(Aceraverage[element])
+            QR_avr_vector.append(Quercusaverage[element])
 
         covariation_matrix_AC=numpy.dot(numpy.array(matrixAC), numpy.array(matrixAC).transpose())
         covariation_matrix_QR=numpy.dot(numpy.array(matrixQR), numpy.array(matrixQR).transpose())
@@ -158,9 +165,21 @@ def FLD_listOfcombination(n):
         det_AC=numpy.linalg.det(covariation_matrix_AC)
         det_QR=numpy.linalg.det(covariation_matrix_QR)
 
-        print (det_AC)
 
-FLD_listOfcombination(2)
+        absolut=abs(numpy.subtract(AC_avr_vector,QR_avr_vector))
+
+        Fisher=numpy.divide(numpy.linalg.norm(absolut),(det_AC+det_QR))
+        print(Fisher)
+
+        temp=Fisher
+
+        if temp>FLD:
+            FLD=temp
+            index_list=combination
+    print(index_list)
+    return index_list
+
+# FLD_listOfcombination(2)
 
 def FLD_multi_feature(samples,n):
     FLD = 0

@@ -19,7 +19,8 @@ def calculate_FSD():
     if int(combo_value)==1:
         feature=FSD(tablicaProbek)
     else:
-        feature=FLD_multi_feature(tablicaProbek,int(combo_value))
+        FLD_averageMatrix(tablicaProbek)
+        feature=FLD_listOfcombination(int(combo_value))
     return feature
 
 
