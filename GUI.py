@@ -6,20 +6,20 @@ root = Tk()
 root.geometry("500x300")
 root.config(background = "#F2DF95" )
 
-# frame1=Frame(root, width=250, height=100, background="#0087BE")
-# frame1.grid(row=0, column=0)
+frame1=Frame(root, width=250, height=100, background="#0087BE", relief='groove',bd=2)
+frame1.place(x=0,y=0)
+
+frame2=Frame(root, width=250, height=100, background="#BE3700", relief='groove',bd=2)
+frame2.place(x=0,y=100)
 #
-# frame2=Frame(root, width=250, height=100, background="#BE3700")
-# frame2.grid(row=1, column=0)
+frame3=Frame(root, width=250, height=100, background="#BE9600", relief='groove',bd=2)
+frame3.place(x=0,y=200)
 #
-# frame3=Frame(root, width=250, height=100, background="#BE9600")
-# frame3.grid(row=3, column=0)
-#
-# frame4=Frame(root, width=250, height=150, background="#87BE00")
-# frame4.grid(row=0, column=1)
+frame4=Frame(root, width=250, height=150, background="#87BE00", relief='raised',bd=2)
+frame4.place(x=250,y=0)
 # #
-# frame5=Frame(root, width=250, height=150, background="#BE0087")
-# frame5.grid(row=2, column=1)
+frame5=Frame(root, width=250, height=150, background="#006F81", relief='raised',bd=2)
+frame5.place(x=250,y=150)
 
 
 
@@ -52,34 +52,47 @@ def calculate_FSD():
     else:
         FLD_averageMatrix()
         feature=FLD_listOfcombination(int(combo_value))
-    text.set(feature)
+    text_FSD.set(feature)
     # return feature
 
 def calculate_SFS():
     combo_value = combo.get()
     FLD_averageMatrix()
     feature=SFS(int(combo_value))
-    text.set(feature)
+    text_SFS.set(feature)
 
 
 combo = ttk.Combobox(root)
-combo.place(x=50,y=100)
+combo.place(x=35,y=60)
 combo['values'] = combo_values()
 combo.current(0)
 
 
-b = Button(root, text="Wczytaj z pliku",command=lambda:activbutton())
-FSD_button=Button(root, text="FSD", state="disabled", command=lambda:calculate_FSD())
-SFS_button=Button(root, text="SFS", state="disabled",command=lambda:calculate_SFS())
+b = Button(root, text="Wczytaj z pliku",background="#006C98",fg='#EAE4CC',command=lambda:activbutton())
+FSD_button=Button(root, text="FSD", state="disabled",background="#A63000",fg='#EAE4CC',command=lambda:calculate_FSD())
+SFS_button=Button(root, text="SFS", state="disabled", background="#987800",fg='#EAE4CC',command=lambda:calculate_SFS())
 
-b.pack()
-FSD_button.pack()
-SFS_button.pack()
+b.place(x=35,y=25)
+FSD_button.place(x=35,y=130)
+SFS_button.place(x=35,y=230)
 
 
-text=StringVar()
-etykieta=Label(root,textvariable=text)
-etykieta.pack()
+text_FSD=StringVar()
+text_SFS=StringVar()
+
+titie_general=Label(root,text="GENERAL TAB" ,relief='groove')
+title_FSD=Label(root,text="FISHER" ,relief='groove')
+titile_SFS=Label(root,text="Sequential Forward Selection" ,relief='groove')
+
+etykietaFSD=Label(root, textvariable=text_FSD,relief='groove')
+etykietaSFS=Label(root,text="SFS:",textvariable=text_SFS,relief='groove')
+
+
+titie_general.place(x=0,y=0)
+title_FSD.place(x=0,y=100)
+titile_SFS.place(x=0,y=200)
+etykietaFSD.place(x=100,y=132.5)
+etykietaSFS.place(x=100,y=232.5)
 
 
 
