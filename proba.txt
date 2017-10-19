@@ -1,0 +1,6 @@
+Acer Campestre,1,2,1,2
+Acer Campestre,2,3,3,2
+Acer Campestre,1,1,1,4
+Quercus Agrifolia,-1,0,-1,-1
+Quercus Agrifolia,2,2,3,2
+Quercus Agrifolia,3,3,1,4

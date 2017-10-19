@@ -51,13 +51,14 @@ def loadData(filename):
                 global Qc
                 Qc += 1
             # Petla po wszystkich cechach
-            for feature in range(1, 65):
+            for feature in range(1, 65):#65
                 # Dodajemy do tablicy cech wartosc cechy w postaci float
                 features[feature - 1] = float(data[feature])
             # Tworzymy obiekt probki i dodajemy go do tablicy wszystkich probek
             samples.append(Sample(name, identifier, features))
     return samples
-
+#---------------------cześć dodana------------------------------------------------------
+#---------------------podziała danych na swie klasy-------------------------------------
 ACER=[]
 QUERTUS=[]
 
@@ -70,14 +71,16 @@ def get_classes(samples):
         else:
             QUERTUS.append((object.getFeatures()))
 
-get_classes(loadData("data.txt"))
 
+
+get_classes(loadData("data.txt"))
+#--------------------------------
 # Fisher Single Dimension
 def FSD(samples):
     FLD = 0
     tmp = 0
     index = -1
-    acrr = getTupleOfCount(samples)
+    #acrr = getTupleOfCount(samples)
     Ac = 0
     Qc = 0
 
@@ -110,86 +113,105 @@ def FSD(samples):
         Qc = 0
 
     return index
-#------------------------------------------multi n---------------------------------------------------------------------
+#------------------------------------------multi dimentions Fisher---------------------------------------------------------------------
 Aceraverage = []
 Quercusaverage = []
-
-def FLD_averageMatrix(samples):
-    Ac = 0
-    Qc = 0
+# liczenie średniej wartości dla każdej cechy
+def FLD_averageMatrix():
     global Aceraverage
     global Quercusaverage
-    for i in range(0, 64):
-        averageAcer = 0
-        averagesQuercus = 0
-        standardAcer = 0
-        standardQuercus = 0
-        for object in samples:
-            if object.getName() == "Acer":
-                Ac += 1
-                averageAcer += object.getFeatures()[i]
+    for rowA in ACER:
+        Aceraverage.append(sum(rowA)/len(rowA))
+    for rowQ in QUERTUS:
+        Quercusaverage.append(sum(rowQ) / len(rowQ))
 
-            else:
-                Qc += 1
-                averagesQuercus += object.getFeatures()[i]
-
-        averageAcer /= Ac
-        Aceraverage.append(averageAcer)
-        averagesQuercus /= Qc
-        Quercusaverage.append(averagesQuercus)
-
-# FLD_averageMatrix(loadData("data.txt"))
-#-----------------------------------combinations-----------------------------------
+#FLD_averageMatrix(loadData("proba.txt"))#"data.txt"
+#-----------------------------------Fisher wielowymiarowy-----------------------------------
 def FLD_listOfcombination(n):
     FLD=float(0)
     index_list=[]
-    list_elements=list(range(64))
     combinations= itertools.combinations(range(64), n)
     for combination in combinations:
-        matrixAC=[]
-        matrixQR=[]
-        AC_avr_vector=[]
-        QR_avr_vector=[]
-        Fishers=[]
-        for element in combination:
-            value_average_AC = numpy.subtract(ACER[element], ((Aceraverage[element]) * len(ACER[element])))
-            value_average_QR = numpy.subtract(QUERTUS[element], ((Quercusaverage[element]) * len(QUERTUS[element])))
-            matrixAC.append(value_average_AC)
-            matrixQR.append(value_average_QR)
-            AC_avr_vector.append(Aceraverage[element])
-            QR_avr_vector.append(Quercusaverage[element])
+        print(combination)
 
-        covariation_matrix_AC=numpy.dot(numpy.array(matrixAC), numpy.array(matrixAC).transpose())
-        covariation_matrix_QR=numpy.dot(numpy.array(matrixQR), numpy.array(matrixQR).transpose())
+        temp=Fisher(combination)
 
-        det_AC=numpy.linalg.det(covariation_matrix_AC)
-        det_QR=numpy.linalg.det(covariation_matrix_QR)
-
-
-        absolut=abs(numpy.subtract(AC_avr_vector,QR_avr_vector))
-
-        Fisher=numpy.divide(numpy.linalg.norm(absolut),(det_AC+det_QR))
-        print(Fisher)
-
-        temp=Fisher
+        print(temp)
 
         if temp>FLD:
             FLD=temp
             index_list=combination
-    print(index_list)
-    return index_list
+    listOfIndex = [x + 1 for x in list(index_list)]# zwiekszone o 1
+    print("max:",listOfIndex)
+    print (FLD)
+    return list(index_list)
+
+
+def Fisher(combination):
+    matrixAC = []
+    matrixQR = []
+    AC_avr_vector = []
+    QR_avr_vector = []
+    # print(Quercusaverage)
+    # #print("wektor,", QUERTUS[element]-Quercusaverage[element])
+    for element in combination:
+        value_average_AC = numpy.subtract(ACER[element],Aceraverage[element])
+        value_average_QR = numpy.subtract(QUERTUS[element],Quercusaverage[element])
+        matrixAC.append(value_average_AC)
+        matrixQR.append(value_average_QR)
+        AC_avr_vector.append(Aceraverage[element])
+        QR_avr_vector.append(Quercusaverage[element])
+
+    covariation_matrix_AC=numpy.dot(numpy.array(matrixAC), numpy.array(matrixAC).transpose())
+    covariation_matrix_QR=numpy.dot(numpy.array(matrixQR), numpy.array(matrixQR).transpose())
+
+    det_AC=numpy.linalg.det(covariation_matrix_AC)
+     #print("deatAc:",det_AC)
+    det_QR=numpy.linalg.det(covariation_matrix_QR)
+     #print("deatQR:", det_QR)
+
+    absolut=numpy.subtract(AC_avr_vector,QR_avr_vector)
+
+    Fisher=numpy.divide(numpy.linalg.norm(absolut),(det_AC+det_QR))
+
+    return Fisher
+
+
+#----------------------------------------SFS------------------------------------
+def SFS(steps):
+    SFS=0
+    best_features_index=[]
+    FLD_averageMatrix()#wrzucic do guzika
+    best_state_table=[]
+    samples=loadData("data.txt")
+    feature_list = list(range(64))
+    for step in range (1,steps+1):
+        print(best_state_table)
+        if step==1:
+            first = FSD(samples)
+            best_state_table.append(first)
+            best_features_index=best_state_table
+        else:
+            feature_list=[x for x in feature_list if x not in best_state_table]
+            for element in feature_list:
+                best_state_table.append(element)
+                # print(best_state_table)
+                temp_fisher=Fisher(best_state_table)
+                if temp_fisher>SFS:
+                    best_features_index = list(best_state_table)
+                    SFS=temp_fisher
+                # print (temp_fisher)
+                best_state_table.pop(-1)
+                # print (best_state_table)
+            best_state_table.append(best_features_index[-1])
+    print(best_features_index)
+    return best_features_index
+SFS(3)
+
+
+
 
 # FLD_listOfcombination(2)
-
-def FLD_multi_feature(samples,n):
-    FLD = 0
-    tmp = 0
-    index = -1
-    #acrr = getTupleOfCount(samples)
-
-    FLD_averageMatrix(samples)
-    return index
-
 
 # return Tuple of Acer Samples Count and Quercus samples Count
 def getTupleOfCount(samples):
