@@ -1,4 +1,4 @@
-from tkinter import Tk, ttk, StringVar, Button, Label, Frame
+from tkinter import Tk, ttk, StringVar, Button, Label, Frame, Entry
 from main import loadData
 from main import *
 
@@ -61,39 +61,67 @@ def calculate_SFS():
     feature=SFS(int(combo_value))
     text_SFS.set(feature)
 
-
+#combosy
 combo = ttk.Combobox(root)
 combo.place(x=35,y=60)
 combo['values'] = combo_values()
 combo.current(0)
 
+combo_clas = ttk.Combobox(root)
+combo_clas.place(x=350,y=40)
+combo_clas['values'] = ["NN","k-NN","NM","k-NM"]
 
+#entry pola
+ent_trainig_part=Entry(root)
+ent_trainig_part.place(x=350,y=100)
+
+#guziki
 b = Button(root, text="Wczytaj z pliku",background="#006C98",fg='#EAE4CC',command=lambda:activbutton())
 FSD_button=Button(root, text="FSD", state="disabled",background="#A63000",fg='#EAE4CC',command=lambda:calculate_FSD())
 SFS_button=Button(root, text="SFS", state="disabled", background="#987800",fg='#EAE4CC',command=lambda:calculate_SFS())
+train_button= Button(root, text="Train",background="#5E8500",fg='#EAE4CC')
+execute_button=Button(root, text="Execute",background="#5E8500",fg='#EAE4CC')
+
 
 b.place(x=35,y=25)
 FSD_button.place(x=35,y=130)
 SFS_button.place(x=35,y=230)
+train_button.place(x=285,y=40)
+execute_button.place(x=285,y=70)
 
 
-text_FSD=StringVar()
-text_SFS=StringVar()
 
+#etykiety tytuły
 titie_general=Label(root,text="GENERAL TAB" ,relief='groove')
 title_FSD=Label(root,text="FISHER" ,relief='groove')
 titile_SFS=Label(root,text="Sequential Forward Selection" ,relief='groove')
+titile_clasificators=Label(root,text="Klasyfikatory" ,relief='groove')
+title_qualityclasification=Label(root,text="Jakość klasyfikacji" ,relief='groove')
+
+#etykiety wyswietlajace wyniki
+
+text_FSD=StringVar()
+text_SFS=StringVar()
+text_cal_ef=StringVar()
 
 etykietaFSD=Label(root, textvariable=text_FSD,relief='groove')
-etykietaSFS=Label(root,text="SFS:",textvariable=text_SFS,relief='groove')
+etykietaSFS=Label(root,textvariable=text_SFS,relief='groove')
+etykierta_clas_eff=Label(root,textvariable=text_cal_ef,relief='groove')
 
+subtitiel_cal=Label(root,text="%",relief='flat',fg='#EAE4CC',bg="#87BE00")
+training_part=Label(root,text="Training part",relief='flat',fg='#EAE4CC',bg="#87BE00")
 
+#geometria
 titie_general.place(x=0,y=0)
 title_FSD.place(x=0,y=100)
 titile_SFS.place(x=0,y=200)
+titile_clasificators.place(x=250,y=0)
+title_qualityclasification.place(x=250,y=150)
 etykietaFSD.place(x=100,y=132.5)
 etykietaSFS.place(x=100,y=232.5)
-
+etykierta_clas_eff.place(x=285,y=100)
+subtitiel_cal.place(x=315,y=100)
+training_part.place(x=350,y=70)
 
 
 
