@@ -61,6 +61,16 @@ def calculate_SFS():
     feature=SFS(int(combo_value))
     text_SFS.set(feature)
 
+def train():
+    trainig_part = ent_trainig_part.get()
+    get_Test_Training_Matrix(float(trainig_part))
+    # return trainig_part
+
+def calculate_clasyficators():
+    clasyficator=combo_clas.get()
+    efficiency=clasyficator_calculation(clasyficator)
+    text_cal_ef.set(efficiency)
+
 #combosy
 combo = ttk.Combobox(root)
 combo.place(x=35,y=60)
@@ -79,8 +89,8 @@ ent_trainig_part.place(x=350,y=100)
 b = Button(root, text="Wczytaj z pliku",background="#006C98",fg='#EAE4CC',command=lambda:activbutton())
 FSD_button=Button(root, text="FSD", state="disabled",background="#A63000",fg='#EAE4CC',command=lambda:calculate_FSD())
 SFS_button=Button(root, text="SFS", state="disabled", background="#987800",fg='#EAE4CC',command=lambda:calculate_SFS())
-train_button= Button(root, text="Train",background="#5E8500",fg='#EAE4CC')
-execute_button=Button(root, text="Execute",background="#5E8500",fg='#EAE4CC')
+train_button= Button(root, text="Train",background="#5E8500",fg='#EAE4CC', command=lambda:train())
+execute_button=Button(root, text="Execute",background="#5E8500",fg='#EAE4CC',command=lambda:calculate_clasyficators())
 
 
 b.place(x=35,y=25)

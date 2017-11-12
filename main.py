@@ -4,6 +4,7 @@ import numpy
 from numpy import *
 from sympy import *
 import itertools
+from random import *
 
 # Obiekt do trzymania informacji o probce
 class Sample:
@@ -72,8 +73,58 @@ def get_classes(samples):
             QUERTUS.append((object.getFeatures()))
 
 
+    ACER=numpy.array(ACER).transpose()
+    print(ACER)
+    QUERTUS=numpy.array(QUERTUS).transpose()
 
 get_classes(loadData("data.txt"))
+#-----------------------------------------------------dane do klasyfikacji-----------------------------
+SFS_index=[]
+
+def get_Test_Training_Matrix(part):
+    ACER_clas= ACER.tolist()
+    QUERTUS_clas=QUERTUS.tolist()
+    ACER_manipultaion_matrix=[]
+    QUERTUS_manipulation_matrix=[]
+
+    for n in SFS_index:
+        ACER_manipultaion_matrix.append(ACER_clas[n])
+        QUERTUS_manipulation_matrix.append(QUERTUS_clas[n])
+
+    friction_acer=int(part*len(ACER_clas[0]))
+    friction_quertus=int(part*len(QUERTUS_clas[0]))
+    #generowanie losowych indexow do odziału- test- trening
+    index_lista_acer=range(0,len(ACER_clas[0])-1)
+    index_lista_quertus=range(0,len(QUERTUS_clas[0])-1)
+    training_Acer=sample(index_lista_acer,friction_acer)
+    training_Quetus= sample(index_lista_quertus,friction_quertus)
+
+    #podzial tablica treningowa/ testowa:
+    Acer_training_matrix=[[] for i in range(len(ACER_manipultaion_matrix))]
+    Quertus_training_matrix=[[] for i in range(len(QUERTUS_manipulation_matrix))]
+    Acer_test_matrix=[]
+    Quertus_test_matrix=[]
+
+    for x in range(0,len(ACER_manipultaion_matrix)):
+        for index in training_Acer:
+            z=ACER_manipultaion_matrix[x][index]
+            Acer_training_matrix[x].append(z)
+        Acer_test_matrix.append([m for i, m in enumerate(ACER_manipultaion_matrix[x]) if i not in training_Acer])
+
+    # zyta=Acer_test_matrix
+
+    # print(Acer_test_matrix)
+    for y in range(0,len(QUERTUS_manipulation_matrix)):
+        for index in training_Quetus:
+            q=QUERTUS_manipulation_matrix[y][index]
+            Quertus_training_matrix[y].append(q)
+        Quertus_test_matrix.append([d for i, d in enumerate(QUERTUS_manipulation_matrix[y]) if i not in training_Quetus])
+
+    return {"ACER_Training":Acer_training_matrix,"Quertus_Trainig":Quertus_training_matrix,"ACER_Test":Acer_test_matrix,"Quertus_Test":Quertus_test_matrix}
+
+
+# get_Test_Training_Matrix(0.1)
+
 #--------------------------------
 # Fisher Single Dimension
 def FSD(samples):
@@ -130,8 +181,10 @@ def FLD_averageMatrix():
 def FLD_listOfcombination(n):
     FLD=float(0)
     index_list=[]
+    i=0
     combinations= itertools.combinations(range(64), n)
     for combination in combinations:
+        i=i+1
         print(combination)
 
         temp=Fisher(combination)
@@ -142,6 +195,7 @@ def FLD_listOfcombination(n):
             FLD=temp
             index_list=combination
     listOfIndex = [x + 1 for x in list(index_list)]# zwiekszone o 1
+    print("i",i)
     print("max:",listOfIndex)
     print (FLD)
     return list(index_list)
@@ -179,6 +233,7 @@ def Fisher(combination):
 
 #----------------------------------------SFS------------------------------------
 def SFS(steps):
+    global SFS_index
     SFS=0
     best_features_index=[]
     FLD_averageMatrix()#wrzucic do guzika
@@ -205,11 +260,13 @@ def SFS(steps):
                 # print (best_state_table)
             best_state_table.append(best_features_index[-1])
     print(best_features_index)
+    SFS_index=best_features_index
     return best_features_index
-SFS(3)
-
-
-
+# SFS(3)
+# get_Test_Training_Matrix(0.1)
+#--------------------------------------NN----------------------------------------------------
+def clasyficator_calculation(clasyficator):
+    pass
 
 # FLD_listOfcombination(2)
 
@@ -226,7 +283,8 @@ def getTupleOfCount(samples):
 
     return (Acount,Qcount)
 
-# FLD_listOfcombination(62)
+
+#FLD_listOfcombination(62)
 #print(loadData("data.txt"))
 #FSD()
 
