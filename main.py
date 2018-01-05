@@ -1,10 +1,12 @@
 from math import sqrt
 
 import numpy
+import heapq
 from numpy import *
 from sympy import *
 import itertools
 from random import *
+import time
 
 # Obiekt do trzymania informacji o probce
 class Sample:
@@ -285,6 +287,9 @@ def SFS(steps):
 
 SFS(3)
 get_Test_Training_Matrix(0.2)
+
+
+
 #--------------------------------------NN----------------------------------------------------
 def clasyficator_calculation(clasyficator,k):
     global Train_Test_dictionary
@@ -330,12 +335,13 @@ def clasyficator_calculation(clasyficator,k):
         efficiency=round((NN_good_samples/len(Combine_Test[0])*100),2)
         print("NN_e", efficiency, "%")
         return efficiency
+#------------------------------------------------------k-NN----------------------------------------------------
 
     if clasyficator == "k-NN":
         k_NN_good_samples=len(Combine_Test[0])
-        K_NN_A_matrix=[]
-        K_NN_Q_matrix =[]
         for test_vect in range(0,len(Combine_Test[0])):
+            K_NN_A_matrix = [1000] * k
+            K_NN_Q_matrix = [1000] * k
             for A_train_vect in range(0,len(ACER_Training[0])):
                 A_euqlidean_distance=0
                 A_suma_fin=0
@@ -344,11 +350,14 @@ def clasyficator_calculation(clasyficator,k):
                     A_suma_fin=A_suma_fin+A_suma
                 A_euqlidean_distance = sqrt(A_suma_fin)
                 # liczenie efektywnosci
-                K_NN_A_matrix.append(A_euqlidean_distance)
+                if A_euqlidean_distance<max(K_NN_A_matrix):
+                    K_NN_A_matrix[K_NN_A_matrix.index(max(K_NN_A_matrix))]=A_euqlidean_distance
 
-            K_NN_A_matrix.sort(reverse=False)
-            k_A_sum=sum(K_NN_A_matrix[:k])
+                # K_NN_A_matrix.sort(reverse=False)
+                # k_A_sum=sum((heapq.nsmallest(k, K_NN_A_matrix)))
 
+                # numpy.sort(K_NN_A_matrix)[:k])
+                # k_A_sum = sum(numpy.sort(K_NN_A_matrix)[:k])
 
             for Q_train_vect in range(0,len(QUERTUS_Training[0])):
                 Q_euqlidean_distance=0
@@ -357,11 +366,17 @@ def clasyficator_calculation(clasyficator,k):
                     Q_suma=((QUERTUS_Training[element][Q_train_vect])-Combine_Test[element][test_vect])**2
                     Q_suma_fin=Q_suma_fin+Q_suma
                 Q_euqlidean_distance=sqrt(Q_suma_fin)
+                # najefektywniej zastepowac, zadne cuda z algorytmami sortujacymi nie daja rady
+                if Q_euqlidean_distance<max(K_NN_Q_matrix):
+                    K_NN_Q_matrix[K_NN_Q_matrix.index(max(K_NN_Q_matrix))]= Q_euqlidean_distance
+                # K_NN_Q_matrix.append(Q_euqlidean_distance)
 
-                K_NN_Q_matrix.append(Q_euqlidean_distance)
-
-            K_NN_Q_matrix.sort(reverse=True)
-            k_Q_sum = sum(K_NN_Q_matrix[:k])
+            # k_Q_sum = sum((msort(K_NN_Q_matrix))[:k])
+            # k_Q_sum = sum(heapq.nsmallest(k, K_NN_Q_matrix))
+            # K_NN_Q_matrix.sort(reverse=True)
+            # k_Q_sum = sum(numpy.sort(K_NN_A_matrix)[:k])
+            k_A_sum = sum(K_NN_A_matrix)
+            k_Q_sum = sum(K_NN_Q_matrix)
 
             if (test_vect <= len(Train_Test_dictionary["ACER_Test"][0])) & (k_A_sum<k_Q_sum):
                 k_NN_good_samples=k_NN_good_samples
@@ -370,9 +385,12 @@ def clasyficator_calculation(clasyficator,k):
             else:
                 k_NN_good_samples=k_NN_good_samples-1
 
+
+
         efficiency=round((k_NN_good_samples/len(Combine_Test[0])*100),2)
         print("k_NN_e", efficiency, "%")
         return efficiency
+#---------------------------------------------------NM---------------------------------------------------------------
 
     if clasyficator=="NM":
         NM_good_samples = len(Combine_Test[0])
@@ -417,7 +435,7 @@ def clasyficator_calculation(clasyficator,k):
         return efficiency
 
 # FLD_listOfcombination(2)
-clasyficator_calculation("NM",3)
+clasyficator_calculation("k-NN",3)
 # return Tuple of Acer Samples Count and Quercus samples Count
 def getTupleOfCount(samples):
     Acount = 0
