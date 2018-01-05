@@ -681,7 +681,8 @@ def Crosvalid_Test_Training(clasyficator,k,r):
 
     print("tablica wynikow",Quality_table)
     print("srednia",numpy.mean(Quality_table))
-    return numpy.mean(Quality_table)
+    q=numpy.mean(Quality_table)
+    return round(q,2)
 
     #print("dlugosc",len(Acer_test_matrix))
     #print("Acer:",len(Acer_test_matrix[0]))

@@ -73,6 +73,14 @@ def calculate_clasyficators(): #execute
     efficiency=clasyficator_calculation(clasyficator,k)
     text_cal_ef.set(efficiency)
 
+def calculate_crosvalidation():
+    range=int(ent_crosvalid_range.get())
+    k=int(ent_k_part.get())
+    clasyficator=combo_clas.get()
+    quality=Crosvalid_Test_Training(clasyficator,k,range)
+    text_quality_ef_cros.set(quality)
+
+
 #combosy
 combo = ttk.Combobox(root)
 combo.place(x=35,y=60)
@@ -102,7 +110,7 @@ SFS_button=Button(root, text="SFS", state="disabled", background="#987800",fg='#
 train_button= Button(root, text="Train",background="#5E8500",fg='#EAE4CC', command=lambda:train())
 execute_button=Button(root, text="Execute",background="#5E8500",fg='#EAE4CC',command=lambda:calculate_clasyficators())
 bootstrap=Button(root, text="Bootstrap",background="#006C98",fg='#EAE4CC')
-crosvalidation=Button(root, text="Crosval",background="#006C98",fg='#EAE4CC')
+crosvalidation=Button(root, text="Crosval",background="#006C98",fg='#EAE4CC',command=lambda:calculate_crosvalidation())
 
 
 b.place(x=35,y=25)
@@ -126,17 +134,20 @@ title_qualityclasification=Label(root,text="Jakość klasyfikacji" ,relief='groo
 text_FSD=StringVar()
 text_SFS=StringVar()
 text_cal_ef=StringVar()
-text_quality_ef=StringVar()
+text_quality_ef_cros=StringVar()
+text_quality_ef_bootstrap=StringVar()
 
 etykietaFSD=Label(root, textvariable=text_FSD,relief='groove')
 etykietaSFS=Label(root,textvariable=text_SFS,relief='groove')
 etykierta_clas_eff=Label(root,textvariable=text_cal_ef,relief='groove')
-etykierta_quality_eff=Label(root,textvariable=text_quality_ef,relief='groove')
+etykierta_quality_eff_cros=Label(root, textvariable=text_quality_ef_cros, relief='groove')
+etykierta_quality_eff_bootstrap=Label(root, textvariable=text_quality_ef_bootstrap, relief='groove')
 
 subtitiel_cal=Label(root,text="%",relief='flat',fg='#EAE4CC',bg="#87BE00")
 training_part=Label(root,text="Training part",relief='flat',fg='#EAE4CC',bg="#87BE00")
 k_clasyficators=Label(root,text="k:",relief='flat',fg='#EAE4CC',bg="#87BE00")
-subtitiel_cal_quality=Label(root,text="%",relief='flat',fg='#EAE4CC',bg="#006F81")
+subtitiel_cal_quality_cros=Label(root, text="%", relief='flat', fg='#EAE4CC', bg="#006F81")
+subtitiel_cal_quality_bootstrap=Label(root, text="%", relief='flat', fg='#EAE4CC', bg="#006F81")
 
 
 
@@ -149,11 +160,13 @@ title_qualityclasification.place(x=250,y=150)
 etykietaFSD.place(x=100,y=132.5)
 etykietaSFS.place(x=100,y=232.5)
 etykierta_clas_eff.place(x=350,y=100)
-etykierta_quality_eff.place(x=350,y=260)
+etykierta_quality_eff_cros.place(x=410, y=260)
+etykierta_quality_eff_bootstrap.place(x=350,y=260)
 subtitiel_cal.place(x=400,y=100)
 training_part.place(x=350,y=20)
-subtitiel_cal_quality.place(x=400,y=260)
-k_clasyficators.place(x=285,y=100)
+subtitiel_cal_quality_cros.place(x=450, y=260)
+subtitiel_cal_quality_bootstrap.place(x=380, y=260)
+k_clasyficators.place(x=282,y=100)
 
 
 root.mainloop()
