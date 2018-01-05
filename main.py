@@ -80,8 +80,10 @@ def get_classes(samples):
 get_classes(loadData("data.txt"))
 #-----------------------------------------------------dane do klasyfikacji-----------------------------
 SFS_index=[]
+Train_Test_dictionary={}
 
 def get_Test_Training_Matrix(part):
+    global Train_Test_dictionary
     ACER_clas= ACER.tolist()
     QUERTUS_clas=QUERTUS.tolist()
     ACER_manipultaion_matrix=[]
@@ -91,20 +93,24 @@ def get_Test_Training_Matrix(part):
         ACER_manipultaion_matrix.append(ACER_clas[n])
         QUERTUS_manipulation_matrix.append(QUERTUS_clas[n])
 
+
     friction_acer=int(part*len(ACER_clas[0]))
     friction_quertus=int(part*len(QUERTUS_clas[0]))
+    
     #generowanie losowych indexow do odziału- test- trening
     index_lista_acer=range(0,len(ACER_clas[0])-1)
     index_lista_quertus=range(0,len(QUERTUS_clas[0])-1)
     training_Acer=sample(index_lista_acer,friction_acer)
     training_Quetus= sample(index_lista_quertus,friction_quertus)
 
-    #podzial tablica treningowa/ testowa:
+
+    #tworzenie tablica treningowa / testowa:
     Acer_training_matrix=[[] for i in range(len(ACER_manipultaion_matrix))]
     Quertus_training_matrix=[[] for i in range(len(QUERTUS_manipulation_matrix))]
     Acer_test_matrix=[]
     Quertus_test_matrix=[]
 
+    # przypisanie odpowiednich wartosci do macierzy
     for x in range(0,len(ACER_manipultaion_matrix)):
         for index in training_Acer:
             z=ACER_manipultaion_matrix[x][index]
@@ -120,12 +126,26 @@ def get_Test_Training_Matrix(part):
             Quertus_training_matrix[y].append(q)
         Quertus_test_matrix.append([d for i, d in enumerate(QUERTUS_manipulation_matrix[y]) if i not in training_Quetus])
 
-    return {"ACER_Training":Acer_training_matrix,"Quertus_Trainig":Quertus_training_matrix,"ACER_Test":Acer_test_matrix,"Quertus_Test":Quertus_test_matrix}
+    #tworzenie jednej tablicy probek testowych
+    Combine_test_matrix = [[] for f in range(len(Acer_test_matrix))]
 
+    #print("dlugosc",len(Acer_test_matrix))
+    #print("Acer:",len(Acer_test_matrix[0]))
 
-# get_Test_Training_Matrix(0.1)
+    for t in range(0,len(Acer_test_matrix)):
+        Combine_test_matrix[t]=Acer_test_matrix[t]+Quertus_test_matrix[t]
 
-#--------------------------------
+    print("acerTest,len",len(Acer_test_matrix[0]))
+    print("combine matrix",len(Combine_test_matrix[0]))
+    # koniec tworzenia wspolej tablicy probek
+    Train_Test_dictionary= {"ACER_Training":Acer_training_matrix,"Quertus_Trainig":Quertus_training_matrix,"ACER_Test":Acer_test_matrix,"Quertus_Test":Quertus_test_matrix,"Combine_Test":Combine_test_matrix}
+
+    # return {"ACER_Training":Acer_training_matrix,"Quertus_Trainig":Quertus_training_matrix,"ACER_Test":Acer_test_matrix,"Quertus_Test":Quertus_test_matrix,"Compbine_Test":Combine_test_matrix}
+# czy mozna zrobic return as global?
+
+ # get_Test_Training_Matrix(0.1)
+#SFS(3)
+#-----------------------------------------
 # Fisher Single Dimension
 def FSD(samples):
     FLD = 0
@@ -262,14 +282,142 @@ def SFS(steps):
     print(best_features_index)
     SFS_index=best_features_index
     return best_features_index
-# SFS(3)
-# get_Test_Training_Matrix(0.1)
+
+SFS(3)
+get_Test_Training_Matrix(0.2)
 #--------------------------------------NN----------------------------------------------------
-def clasyficator_calculation(clasyficator):
-    pass
+def clasyficator_calculation(clasyficator,k):
+    global Train_Test_dictionary
+    efficiency=0
+    Combine_Test=Train_Test_dictionary["Combine_Test"]
+    ACER_Training=Train_Test_dictionary["ACER_Training"]
+    QUERTUS_Training = Train_Test_dictionary["Quertus_Trainig"]
+    samples=len(Combine_Test[0])
+
+    if clasyficator=="NN":# tzreba dodać rozroznienia pomiedzi acerem i Quertusem
+        NN_good_samples=len(Combine_Test[0])
+
+        for test_vect in range(0,len(Combine_Test[0])):
+            A_min_dist=1000
+            Q_min_dist = 1000
+            for A_train_vect in range(0,len(ACER_Training[0])):
+                A_euqlidean_distance=0
+                A_suma_fin=0
+                for element in range(0,len(Combine_Test)):
+                    A_suma=((ACER_Training[element][A_train_vect])-Combine_Test[element][test_vect])**2
+                    A_suma_fin=A_suma_fin+A_suma
+                A_euqlidean_distance = sqrt(A_suma_fin)
+                if A_euqlidean_distance<A_min_dist:
+                    A_min_dist=A_euqlidean_distance
+
+            for Q_train_vect in range(0,len(QUERTUS_Training[0])):
+                Q_euqlidean_distance=0
+                Q_suma_fin=0
+                for element in range (0,len(Combine_Test)):
+                    Q_suma=((QUERTUS_Training[element][Q_train_vect])-Combine_Test[element][test_vect])**2
+                    Q_suma_fin=Q_suma_fin+Q_suma
+                Q_euqlidean_distance=sqrt(Q_suma_fin)
+                if Q_euqlidean_distance < Q_min_dist:
+                    Q_min_dist = Q_euqlidean_distance
+
+            if (test_vect <= len(Train_Test_dictionary["ACER_Test"][0])) & (A_min_dist<Q_min_dist):
+                NN_good_samples=NN_good_samples
+            elif (test_vect >len(Train_Test_dictionary["ACER_Test"][0])) & (A_min_dist>Q_min_dist):
+                NN_good_samples = NN_good_samples
+            else:
+                NN_good_samples=NN_good_samples-1
+
+        efficiency=round((NN_good_samples/len(Combine_Test[0])*100),2)
+        print("NN_e", efficiency, "%")
+        return efficiency
+
+    if clasyficator == "k-NN":
+        k_NN_good_samples=len(Combine_Test[0])
+        K_NN_A_matrix=[]
+        K_NN_Q_matrix =[]
+        for test_vect in range(0,len(Combine_Test[0])):
+            for A_train_vect in range(0,len(ACER_Training[0])):
+                A_euqlidean_distance=0
+                A_suma_fin=0
+                for element in range(0,len(Combine_Test)):
+                    A_suma=((ACER_Training[element][A_train_vect])-Combine_Test[element][test_vect])**2
+                    A_suma_fin=A_suma_fin+A_suma
+                A_euqlidean_distance = sqrt(A_suma_fin)
+                # liczenie efektywnosci
+                K_NN_A_matrix.append(A_euqlidean_distance)
+
+            K_NN_A_matrix.sort(reverse=False)
+            k_A_sum=sum(K_NN_A_matrix[:k])
+
+
+            for Q_train_vect in range(0,len(QUERTUS_Training[0])):
+                Q_euqlidean_distance=0
+                Q_suma_fin=0
+                for element in range (0,len(Combine_Test)):
+                    Q_suma=((QUERTUS_Training[element][Q_train_vect])-Combine_Test[element][test_vect])**2
+                    Q_suma_fin=Q_suma_fin+Q_suma
+                Q_euqlidean_distance=sqrt(Q_suma_fin)
+
+                K_NN_Q_matrix.append(Q_euqlidean_distance)
+
+            K_NN_Q_matrix.sort(reverse=True)
+            k_Q_sum = sum(K_NN_Q_matrix[:k])
+
+            if (test_vect <= len(Train_Test_dictionary["ACER_Test"][0])) & (k_A_sum<k_Q_sum):
+                k_NN_good_samples=k_NN_good_samples
+            elif (test_vect >len(Train_Test_dictionary["ACER_Test"][0])) & (k_A_sum>k_Q_sum):
+                k_NN_good_samples = k_NN_good_samples
+            else:
+                k_NN_good_samples=k_NN_good_samples-1
+
+        efficiency=round((k_NN_good_samples/len(Combine_Test[0])*100),2)
+        print("k_NN_e", efficiency, "%")
+        return efficiency
+
+    if clasyficator=="NM":
+        NM_good_samples = len(Combine_Test[0])
+
+        A_training_mean=[]
+        Q_training_mean=[]
+
+        for row in ACER_Training:
+            A_mean=numpy.mean(row)
+            A_training_mean.append(A_mean)
+
+        for row in QUERTUS_Training:
+            Q_mean=numpy.mean(row)
+            Q_training_mean.append(Q_mean)
+
+        for test_vect in range(0,len(Combine_Test[0])):
+            A_euqlidean_distance=0
+            A_suma_fin=0
+            Q_euqlidean_distance = 0
+            Q_suma_fin = 0
+            A_min_mean = 1000
+            Q_min_mean = 1000
+            for element in range(0,len(Combine_Test)):
+                A_suma=((A_training_mean[element])-Combine_Test[element][test_vect])**2
+                A_suma_fin=A_suma_fin+A_suma
+            A_euqlidean_distance = sqrt(A_suma_fin)
+
+            for element in range(0, len(Combine_Test)):
+                Q_suma = ((Q_training_mean[element]) - Combine_Test[element][test_vect]) ** 2
+                Q_suma_fin = Q_suma_fin + Q_suma
+            Q_euqlidean_distance = sqrt(Q_suma_fin)
+
+            if (test_vect <= len(Train_Test_dictionary["ACER_Test"][0])) & (A_euqlidean_distance < Q_euqlidean_distance):
+                NM_good_samples = NM_good_samples
+            elif (test_vect > len(Train_Test_dictionary["ACER_Test"][0])) & (A_euqlidean_distance > Q_euqlidean_distance):
+                NM_good_samples = NM_good_samples
+            else:
+                NM_good_samples = NM_good_samples - 1
+
+        efficiency = round((NM_good_samples / len(Combine_Test[0]) * 100), 2)
+        print("NM_e", efficiency, "%")
+        return efficiency
 
 # FLD_listOfcombination(2)
-
+clasyficator_calculation("NM",3)
 # return Tuple of Acer Samples Count and Quercus samples Count
 def getTupleOfCount(samples):
     Acount = 0
