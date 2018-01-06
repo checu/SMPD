@@ -661,7 +661,7 @@ def Crosvalid_Test_Training(clasyficator,k,r):
         if clasyficator == "NN":
             Quality_table.append(NN(Combine_test_matrix, Acer_training_matrix, Quertus_training_matrix,Acer_test_matrix[0])) # trzeba dodać rozroznienia pomiedzi acerem i Quertusem
         if clasyficator == "k-NN":
-            return k_NN(Combine_test_matrix, Acer_training_matrix, Quertus_training_matrix,Acer_test_matrix[0], k)
+            Quality_table.append(k_NN(Combine_test_matrix, Acer_training_matrix, Quertus_training_matrix,Acer_test_matrix[0], k))
         if clasyficator == "NM":
             Quality_table.append(NM(Combine_test_matrix, Acer_training_matrix, Quertus_training_matrix,Acer_test_matrix[0]))
 
@@ -687,11 +687,57 @@ def Crosvalid_Test_Training(clasyficator,k,r):
     #print("dlugosc",len(Acer_test_matrix))
     #print("Acer:",len(Acer_test_matrix[0]))
 
+# Crosvalid_Test_Training("NM",3,5)
 
 
+# ------------------------------------------BOOTSTRAP----------------------------------------------------------------
+def Bootstrap(clasyficator,k,i):
 
-Crosvalid_Test_Training("NM",3,5)
+    ACER_clas = ACER.tolist()
+    QUERTUS_clas = QUERTUS.tolist()
+    ACER_manipultaion_matrix = []
+    QUERTUS_manipulation_matrix = []
+    # r=5
+    for n in SFS_index:
+        ACER_manipultaion_matrix.append(ACER_clas[n])
+        QUERTUS_manipulation_matrix.append(QUERTUS_clas[n])
 
+    iteration=0
+    QualityTableB=[]
+    while(iteration<i):
+
+        Acer_test_matrix = []
+        Quertus_test_matrix = []
+
+        A_test_index=sample(range(0, len(ACER_manipultaion_matrix[0])), 100)
+        Q_test_index=sample(range(0, len(QUERTUS_manipulation_matrix[0])), 100)
+
+        for x in range(0,len(ACER_manipultaion_matrix)):
+            Acer_test_matrix.append([m for i, m in enumerate(ACER_manipultaion_matrix[x]) if i in A_test_index])
+
+        for y in range(0,len(QUERTUS_manipulation_matrix)):
+            Quertus_test_matrix.append([m for i, m in enumerate(QUERTUS_manipulation_matrix[y]) if i in Q_test_index])
+
+        Combine_test_matrix = [[] for f in range(len(Acer_test_matrix))]
+
+        for t in range(0, len(Acer_test_matrix)):
+            Combine_test_matrix[t] = Acer_test_matrix[t] + Quertus_test_matrix[t]
+
+        if clasyficator == "NN":
+            QualityTableB.append(NN(Combine_test_matrix, ACER_manipultaion_matrix, QUERTUS_manipulation_matrix,Acer_test_matrix[0])) # trzeba dodać rozroznienia pomiedzi acerem i Quertusem
+        if clasyficator == "k-NN":
+            QualityTableB.append(k_NN(Combine_test_matrix, ACER_manipultaion_matrix, QUERTUS_manipulation_matrix,Acer_test_matrix[0], k))
+        if clasyficator == "NM":
+            QualityTableB.append(NM(Combine_test_matrix, ACER_manipultaion_matrix, QUERTUS_manipulation_matrix,Acer_test_matrix[0]))
+
+        iteration+=1
+
+    print("tablica wynikow", QualityTableB)
+    print("srednia", numpy.mean(QualityTableB))
+    qB = numpy.mean(QualityTableB)
+    return round(qB,2)
+
+Bootstrap("NM",1,3)
 
 # return Tuple of Acer Samples Count and Quercus samples Count
 def getTupleOfCount(samples):

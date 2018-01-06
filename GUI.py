@@ -80,6 +80,14 @@ def calculate_crosvalidation():
     quality=Crosvalid_Test_Training(clasyficator,k,range)
     text_quality_ef_cros.set(quality)
 
+def calculate_bootstrap():
+    iteration=int(ent_bootstrap_iter.get())
+    k = int(ent_k_part.get())
+    clasyficator = combo_clas.get()
+    qualityB=Bootstrap(clasyficator,k,iteration)
+    text_quality_ef_bootstrap.set(qualityB)
+
+
 
 #combosy
 combo = ttk.Combobox(root)
@@ -109,7 +117,7 @@ FSD_button=Button(root, text="FSD", state="disabled",background="#A63000",fg='#E
 SFS_button=Button(root, text="SFS", state="disabled", background="#987800",fg='#EAE4CC',command=lambda:calculate_SFS())
 train_button= Button(root, text="Train",background="#5E8500",fg='#EAE4CC', command=lambda:train())
 execute_button=Button(root, text="Execute",background="#5E8500",fg='#EAE4CC',command=lambda:calculate_clasyficators())
-bootstrap=Button(root, text="Bootstrap",background="#006C98",fg='#EAE4CC')
+bootstrap=Button(root, text="Bootstrap",background="#006C98",fg='#EAE4CC',command=lambda:calculate_bootstrap())
 crosvalidation=Button(root, text="Crosval",background="#006C98",fg='#EAE4CC',command=lambda:calculate_crosvalidation())
 
 
@@ -165,7 +173,7 @@ etykierta_quality_eff_bootstrap.place(x=350,y=260)
 subtitiel_cal.place(x=400,y=100)
 training_part.place(x=350,y=20)
 subtitiel_cal_quality_cros.place(x=450, y=260)
-subtitiel_cal_quality_bootstrap.place(x=380, y=260)
+subtitiel_cal_quality_bootstrap.place(x=383, y=260)
 k_clasyficators.place(x=282,y=100)
 
 
