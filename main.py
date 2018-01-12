@@ -137,15 +137,15 @@ def get_Test_Training_Matrix(part):
     for t in range(0,len(Acer_test_matrix)):
         Combine_test_matrix[t]=Acer_test_matrix[t]+Quertus_test_matrix[t]
 
-    print("acerTest,len",len(Acer_test_matrix[0]))
-    print("combine matrix",len(Combine_test_matrix[0]))
+    # print("acerTest,len",len(Acer_test_matrix[0]))
+    # print("combine matrix",len(Combine_test_matrix[0]))
     # koniec tworzenia wspolej tablicy probek
     Train_Test_dictionary= {"ACER_Training":Acer_training_matrix,"Quertus_Trainig":Quertus_training_matrix,"ACER_Test":Acer_test_matrix,"Quertus_Test":Quertus_test_matrix,"Combine_Test":Combine_test_matrix}
 
     # return {"ACER_Training":Acer_training_matrix,"Quertus_Trainig":Quertus_training_matrix,"ACER_Test":Acer_test_matrix,"Quertus_Test":Quertus_test_matrix,"Compbine_Test":Combine_test_matrix}
 # czy mozna zrobic return as global?
 
- # get_Test_Training_Matrix(0.1)
+get_Test_Training_Matrix(0.1)
 #SFS(3)
 #-----------------------------------------
 # Fisher Single Dimension
@@ -569,6 +569,111 @@ def NM (Combine_Test,ACER_Training,QUERTUS_Training,Acer_Test_number):
     print("NM_e", efficiency, "%")
     return efficiency
 
+# ----------------------------------------------k_NM-----------------------------------------------------------------
+# nadpisuje combine i nie cysci
+
+def k_NM(Combine_Test,Acer_Test_number):
+
+
+    k_NM_good_samples = len(Combine_Test[0])
+    A_claster=[]
+    Q_claster=[]
+
+    ct=Combine_Test[:]
+    ct.append(list(range(0,len(ct[0]))))
+    # randomowo wybieramy dwa punkty(dwa mody)
+    A_random = numpy.random.choice(len(ct[0]))
+    Q_random = numpy.random.choice(len(ct[0]))
+
+    A_mean=[]
+    Q_mean=[]
+
+
+
+    for row in range(0,len(ct)):
+        A_mean.append(ct[row][A_random])
+        Q_mean.append((ct[row][Q_random]))
+
+    print("am",A_mean)
+    print("qm",Q_mean)
+    koniec=false
+    out_check_list=[]
+
+    while (not(len(out_check_list)==len(A_mean)+len(Q_mean)-2)):
+
+        print("1")
+        out_check_list=[]
+        A_groupe = []
+        Q_groupe = []
+
+        A_check_mean = numpy.array(A_mean)
+        Q_check_mean = numpy.array(Q_mean)
+
+        for test_vect in range(0, len(ct[0])):
+
+            A_euqlidean_distance = 0
+            A_suma_fin = 0
+            Q_euqlidean_distance = 0
+            Q_suma_fin = 0
+            for element in range(0, len(ct)-1):
+                try:
+                    A_suma = ((A_mean[element]) - ct[element][test_vect]) ** 2
+                    A_suma_fin = A_suma_fin + A_suma
+                except:
+                    print("testvector, element", test_vect,element)
+            A_euqlidean_distance = sqrt(A_suma_fin)
+
+            for element in range(0, len(ct)-1):
+                Q_suma = ((Q_mean[element]) - ct[element][test_vect]) ** 2
+                Q_suma_fin = Q_suma_fin + Q_suma
+            Q_euqlidean_distance = sqrt(Q_suma_fin)
+
+            if A_euqlidean_distance<Q_euqlidean_distance:
+                A_groupe.append(ct[len(ct)-1][test_vect])
+            else:
+                Q_groupe.append(ct[len(ct)-1][test_vect])
+
+
+
+        for i in range(0,len(ct)-1):
+            A_mean[i]=numpy.mean(numpy.array(ct[i])[A_groupe])
+            Q_mean[i]=numpy.mean(numpy.array(ct[i])[Q_groupe])
+
+        # ogarnac jak wyjsc z petli.
+        # przerwanie petli kiedy wartosci sredniej nie zmienia sie o zadany prog
+        for r in range(0,len(A_mean)-1):
+            if abs(A_mean[r]-A_check_mean[r])<0.00001:
+                out_check_list.append(1)
+        for r in range(0,len(Q_mean)-1):
+            if abs(Q_mean[r]-Q_check_mean[r])<0.00001:
+                out_check_list.append(1)
+        # print("check",out_check_list)
+    # print("asrednia",A_mean)
+    # print("Qsrdnia",Q_mean)
+    for sample in A_groupe:
+        if sample >= len (Acer_Test_number):
+            k_NM_good_samples=k_NM_good_samples-1
+    for sample in Q_groupe:
+        if sample< len(Acer_Test_number):
+            k_NM_good_samples=k_NM_good_samples-1
+
+    print(k_NM_good_samples)
+    efficiency = round((k_NM_good_samples / len(ct[0]) * 100), 2)
+    print("k_NM_e", efficiency, "%")
+    return efficiency
+
+
+    # print("grupa",A_groupe)
+    # print("agrupw",Q_groupe)
+
+    # print("a",A_random)
+    # print("q",Q_random)
+
+
+    # print ("ct",ct)
+
+# k_NM()
+
 # -----------------------------------------klasyfikatory-----------------------------------------------------------
 def clasyficator_calculation(clasyficator,k):
     global Train_Test_dictionary
@@ -584,6 +689,8 @@ def clasyficator_calculation(clasyficator,k):
         return k_NN(Combine_Test,ACER_Training,QUERTUS_Training,Acer_Test_number,k)
     if clasyficator=="NM":
         return NM(Combine_Test, ACER_Training, QUERTUS_Training, Acer_Test_number)
+    if clasyficator == "k-NM":
+        return(k_NM(Combine_Test, Acer_Test_number))
 
 # clasyficator_calculation("k-NN",3)
 
@@ -664,6 +771,8 @@ def Crosvalid_Test_Training(clasyficator,k,r):
             Quality_table.append(k_NN(Combine_test_matrix, Acer_training_matrix, Quertus_training_matrix,Acer_test_matrix[0], k))
         if clasyficator == "NM":
             Quality_table.append(NM(Combine_test_matrix, Acer_training_matrix, Quertus_training_matrix,Acer_test_matrix[0]))
+        if clasyficator=="k-NM":
+            Quality_table.append(k_NM(Combine_test_matrix,Acer_test_matrix[0]))
 
         if A_range_len+A_range_len_1<len(ACER_manipultaion_matrix[0]):
             print("dlugosci",len(ACER_manipultaion_matrix[0]))
@@ -729,7 +838,8 @@ def Bootstrap(clasyficator,k,i):
             QualityTableB.append(k_NN(Combine_test_matrix, ACER_manipultaion_matrix, QUERTUS_manipulation_matrix,Acer_test_matrix[0], k))
         if clasyficator == "NM":
             QualityTableB.append(NM(Combine_test_matrix, ACER_manipultaion_matrix, QUERTUS_manipulation_matrix,Acer_test_matrix[0]))
-
+        if clasyficator=="k-NM":
+            QualityTableB.append(k_NM(Combine_test_matrix,Acer_test_matrix[0]))
         iteration+=1
 
     print("tablica wynikow", QualityTableB)
@@ -737,7 +847,7 @@ def Bootstrap(clasyficator,k,i):
     qB = numpy.mean(QualityTableB)
     return round(qB,2)
 
-Bootstrap("NM",1,3)
+# Bootstrap("NM",1,3)
 
 # return Tuple of Acer Samples Count and Quercus samples Count
 def getTupleOfCount(samples):
