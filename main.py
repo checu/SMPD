@@ -1,12 +1,14 @@
 from math import sqrt
 
 import numpy
-import heapq
+
 from numpy import *
 from sympy import *
 import itertools
 from random import *
 import time
+import heapq
+
 
 # Obiekt do trzymania informacji o probce
 class Sample:
@@ -467,7 +469,7 @@ def NN(Combine_Test,ACER_Training,QUERTUS_Training,Acer_Test_number):
     print("NN_e", efficiency, "%")
     return efficiency
 
-# --------------------------------------------------k-NN----------------------------------------------------------
+# --------------------------------------------------k-NN---------------------------------------------------------------
 def k_NN(Combine_Test,ACER_Training,QUERTUS_Training,Acer_Test_number,k):
 
     k_NN_good_samples = len(Combine_Test[0])
@@ -508,19 +510,51 @@ def k_NN(Combine_Test,ACER_Training,QUERTUS_Training,Acer_Test_number,k):
         # k_Q_sum = sum(heapq.nsmallest(k, K_NN_Q_matrix))
         # K_NN_Q_matrix.sort(reverse=True)
         # k_Q_sum = sum(numpy.sort(K_NN_A_matrix)[:k])
-        k_A_sum = sum(K_NN_A_matrix)
-        k_Q_sum = sum(K_NN_Q_matrix)
 
-        if (test_vect <= len(Acer_Test_number)) & (k_A_sum < k_Q_sum):
+
+        # wersja 0 -->mapowanie
+
+        # for l in range(0,k):
+        #     K_NN_A_matrix[k].append("a")
+        #     K_NN_Q_matrix[k].append("q")
+        # print ("a",K_NN_A_matrix,"q",K_NN_Q_matrix)
+
+        # wersja 1
+        K_NN_A_matrix.sort(reverse=False)
+        K_NN_Q_matrix.sort(reverse=False)
+
+        probki = []
+        for i in range(0, k):
+            probki.append(Tag("A",K_NN_A_matrix[i]))
+            probki.append(Tag("Q", K_NN_Q_matrix[i]))
+
+        probki.sort(key=lambda x: x.value,reverse=False)
+
+        k_A_sum=0
+        k_Q_sum=0
+
+        for i in range(0,k):
+            if probki[i].tag == "A":
+                k_A_sum+=1
+            elif probki[i].tag == "Q":
+                k_Q_sum+=1
+
+        if (test_vect <= len(Acer_Test_number)) & (k_A_sum > k_Q_sum):
             k_NN_good_samples = k_NN_good_samples
-        elif (test_vect > len(Acer_Test_number)) & (k_A_sum > k_Q_sum):
+        elif (test_vect > len(Acer_Test_number)) & (k_A_sum < k_Q_sum):
             k_NN_good_samples = k_NN_good_samples
         else:
             k_NN_good_samples = k_NN_good_samples - 1
 
+
     efficiency = round((k_NN_good_samples / len(Combine_Test[0]) * 100), 2)
     print("k_NN_e", efficiency, "%")
     return efficiency
+
+class Tag:
+    def __init__(self, tag, value):
+        self.tag = tag
+        self.value = value
 
 # --------------------------------------------------NM-----------------------------------------------------------------
 def NM (Combine_Test,ACER_Training,QUERTUS_Training,Acer_Test_number):
@@ -570,7 +604,7 @@ def NM (Combine_Test,ACER_Training,QUERTUS_Training,Acer_Test_number):
     return efficiency
 
 # ----------------------------------------------k_NM-----------------------------------------------------------------
-# nadpisuje combine i nie cysci
+# nadpisuje combine i nie czysci
 
 def k_NM(Combine_Test,Acer_Test_number):
 
@@ -582,7 +616,7 @@ def k_NM(Combine_Test,Acer_Test_number):
     ct=Combine_Test[:]
     ct.append(list(range(0,len(ct[0]))))
     # randomowo wybieramy dwa punkty(dwa mody)
-    A_random = numpy.random.choice(len(ct[0]))
+    A_random = numpy.random.choice(0,len(ct[0]))
     Q_random = numpy.random.choice(len(ct[0]))
 
     A_mean=[]
